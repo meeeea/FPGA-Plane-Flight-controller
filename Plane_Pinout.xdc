@@ -1,0 +1,8 @@
+set_property IOSTANDARD LVCMOS33 [get_ports ESC_PWM_0]
+set_property IOSTANDARD LVCMOS33 [get_ports I_Bus_RX_0]
+set_property IOSTANDARD LVCMOS33 [get_ports Servo_TX_0]
+set_property IOSTANDARD LVCMOS33 [get_ports clk_in1_0]
+set_property PACKAGE_PIN P1 [get_ports ESC_PWM_0]
+set_property PACKAGE_PIN R3 [get_ports I_Bus_RX_0]
+set_property PACKAGE_PIN M3 [get_ports Servo_TX_0]
+set_property PACKAGE_PIN L17 [get_ports clk_in1_0]
