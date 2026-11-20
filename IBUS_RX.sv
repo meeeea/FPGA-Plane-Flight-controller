@@ -36,7 +36,7 @@ module IBUS_RX #(
         input RX,
 
         // outputs
-        output logic [6 * 16 : 0] Ch,   // Ch[n] = FlySky channel n
+        output logic [6 * 16 - 1: 0] Ch,   // Ch[n] = FlySky channel n
         output logic FrameValid,        // high for one clk after each good frame
         output logic Failsafe
     );
@@ -46,6 +46,7 @@ module IBUS_RX #(
 
     logic [7:0] rData;
     logic rValid;
+    logic rReady;
 
     logic [4:0] idx = 0;                // which byte of the frame is next (0-31)
     logic [15:0] sum = 0;               // running sum of bytes 0-29
@@ -59,9 +60,11 @@ module IBUS_RX #(
     always_ff @(posedge clk)
     begin
         FrameValid <= 0;
+        rReady <= 1;
         if (~Failsafe) silence <= silence + 1;
 
         if (rValid) begin
+            rReady <= 0;
             gap <= 0;
             idx <= idx + 1;
             if (idx == 0) sum <= rData;
@@ -74,9 +77,7 @@ module IBUS_RX #(
                 31: begin                                   // checksum high byte
                     idx <= 0;
                     if ({rData, lo} == 16'hFFFF - sum) begin
-                        Ch <= {Shadow[11], Shadow[10], Shadow[9],
-                               Shadow[8], Shadow[7], Shadow[6],
-                               Shadow[5], Shadow[4], Shadow[3],
+                        Ch <= {Shadow[5], Shadow[4], Shadow[3],
                                Shadow[2], Shadow[1], Shadow[0]};
                         FrameValid <= 1;
                         silence <= 0;
@@ -92,5 +93,5 @@ module IBUS_RX #(
             idx <= 0;                   // line has been idle: next byte starts a new frame
     end
 
-    UART_RX U1 (clk, RX, rData, rValid);
+    UART_RX U1 (clk, RX, rData, rReady, rValid);
 endmodule
