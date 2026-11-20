@@ -34,6 +34,7 @@ module UART_RX(
     localparam logic [7:0] Sample_Point2 = 8'h57;
     localparam logic [7:0] Sample_Point3 = 8'h82;
 
+    initial rData = 8'hFF;
     
     logic [1:0] Data_point;
     
@@ -57,7 +58,7 @@ module UART_RX(
         // bauder
         if (bauder > 8'hAD) begin
             bauder <= 0;
-        end else bauder ++;
+        end else bauder <= bauder + 1;
         
         // update some values
         RX_sync_buf <= RX;
@@ -85,7 +86,7 @@ module UART_RX(
             if (bauder == 8'hAD) begin
                 if (cycle == 9) 
                     next_state <= 2'b11;
-                cycle ++;
+                cycle <= cycle + 1;
             end
         end
         
