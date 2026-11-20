@@ -24,8 +24,8 @@ module IBUS_Channel_Decoder #(
     parameter int min_in = 1000,
     parameter int max_in = 2000,
     parameter int res = 8,
-    parameter [res - 1:0] min_out = 0,
-    parameter [res - 1:0] max_out = 2 ** res - 1
+    parameter int min_out = 0,
+    parameter int max_out = 2 ** res - 1
     )(
     input [15:0] Data,
     output [res - 1:0] Out

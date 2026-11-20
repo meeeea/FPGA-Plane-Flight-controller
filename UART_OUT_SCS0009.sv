@@ -98,6 +98,8 @@ module SCS009_Interpreter #(
                       Pos[0][7:0] + {2'b00 , Pos[0][9:8]} + 
                       Pos[1][7:0] + {2'b00 , Pos[1][9:8]} + 
                       Pos[2][7:0] + {2'b00 , Pos[2][9:8]});
+        default:
+            data = 8'hFF;
     endcase
     
     UART_TX U1 (clk_20MHz, TX, data, wValid, wReady);

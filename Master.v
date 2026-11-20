@@ -26,10 +26,11 @@ module Master(
     output Servo_TX,
     output ESC_PWM
     );
-    reg [14:1] IBUS_Channels [11:0];
-    wire [15:0] Ch_buf [0:5];
+    wire [14:1] IBUS_Channels [11:0];
+    reg [15:0] Channel [5:0];
+    wire [15:0] Ch_buf [5:0];
     wire [7:0] Throttle;
-    wire [7:0] Servo_Pos [2:0]; // [0] pitch, [1] right wing, [2] left wing.
+    wire [9:0] Servo_Pos [2:0]; // [0] pitch, [1] right wing, [2] left wing.
     wire Failsafe;
     wire FrameValid;
     wire throttle_active;
@@ -40,18 +41,24 @@ module Master(
     localparam throttle_enable = 4;
     // Some Processing can be done here
     
+    always @(posedge FrameValid) begin
+        Channel[0] <= Ch_buf[0];
+        Channel[1] <= Ch_buf[1];
+        Channel[2] <= Ch_buf[2];
+        Channel[3] <= Ch_buf[3];
+        Channel[4] <= Ch_buf[4];
+        Channel[5] <= Ch_buf[5];    
+    end
     
+    IBUS_RX #(.CLK_HZ(20_000_000)) I1 (clk_20MHz, I_Bus_RX, {Ch_buf[5], Ch_buf[4], 
+                Ch_buf[3], Ch_buf[2], Ch_buf[1], Ch_buf[0]}, FrameValid, Failsafe);
     
-    IBUS_RX #(.CLK_HZ(20_000_000)) I1 (clk_20MHz, I_Bus_RX, {Ch_buf[6], 
-    Ch_buf[5], Ch_buf[4], Ch_buf[3], Ch_buf[2], Ch_buf[1], Ch_buf[0]
-    }, FrameValid, Failsafe);
+    IBUS_Channel_Decoder #(.res(8), .min_out(0), .max_out(256)) D1 (Channel[throttle_channel], Throttle); //trottle
+    IBUS_Channel_Decoder #(.res(10), .min_out(380), .max_out(700)) D2 (Channel[roll_channel], Servo_Pos[1]); // right wing pos
+    IBUS_Channel_Decoder #(.res(10), .min_out(360), .max_out(650)) D3 (Channel[roll_channel], Servo_Pos[2]); // left wing pos
+    IBUS_Channel_Decoder #(.res(10), .min_out(200), .max_out(700)) D4 (Channel[pitch_channel], Servo_Pos[0]);
+    IBUS_Channel_Decoder #(.res(1), .min_out(0), .max_out(1)) D5 (Channel[throttle_enable], throttle_active);
     
-    IBUS_Channel_Decoder #(.res(8), .min_out(0), .max_out(256)) D1 (Ch_buf[throttle_channel], Throttle); //trottle
-    IBUS_Channel_Decoder #(.res(10), .min_out(380), .max_out(700)) D2 (Ch_buf[roll_channel], Servo_Pos[1]); // right wing pos
-    IBUS_Channel_Decoder #(.res(10), .min_out(360), .max_out(650)) D3 (Ch_buf[roll_channel], Servo_Pos[2]); // left wing pos
-    IBUS_Channel_Decoder #(.res(10), .min_out(200), .max_out(700)) D4 (Ch_buf[pitch_channel], Servo_Pos[0]);
-    IBUS_Channel_Decoder #(.res(1), .min_out(0), .max_out(1)) D5 (Ch_buf[throttle_enable], throttle_active);
-    
-    ESC_Controller O1 (clk_20MHz, ((Failsafe | throttle_active)? 0 : Throttle), ESC_PWM);
-    SCS009_Interpreter O2 (clk_20MHz, Servo_TX, {Servo_Pos[0], 2'b00}, Servo_Pos[1], Servo_Pos[2], 1, Servo_Ready);
+    ESC_Controller O1 (clk_20MHz, Throttle, ESC_PWM);
+    SCS009_Interpreter O2 (clk_20MHz, Servo_TX, Servo_Pos[0], Servo_Pos[1], Servo_Pos[2], 1, Servo_Ready);
 endmodule
