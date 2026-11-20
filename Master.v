@@ -40,8 +40,8 @@ module Master(
     localparam throttle_channel = 2;
     localparam throttle_enable = 4;
     // Some Processing can be done here
-    
-    always @(posedge FrameValid) begin
+        
+    always @(posedge clk_20MHz) begin
         Channel[0] <= Ch_buf[0];
         Channel[1] <= Ch_buf[1];
         Channel[2] <= Ch_buf[2];

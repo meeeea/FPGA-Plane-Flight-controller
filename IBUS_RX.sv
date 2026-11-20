@@ -77,14 +77,16 @@ module IBUS_RX #(
                 31: begin                                   // checksum high byte
                     idx <= 0;
                     if ({rData, lo} == 16'hFFFF - sum) begin
-                        Ch <= {Shadow[5], Shadow[4], Shadow[3],
+                        Ch <= {Shadow[11], Shadow[10], Shadow[9],
+                               Shadow[8], Shadow[7], Shadow[6],
+                               Shadow[5], Shadow[4], Shadow[3],
                                Shadow[2], Shadow[1], Shadow[0]};
                         FrameValid <= 1;
                         silence <= 0;
                     end
                 end
                 default:
-                    Shadow[idx-3] <= rData;
+                    Shadow[idx-2] <= rData;
             endcase
         end
         else if (gap != GAP_CLKS)

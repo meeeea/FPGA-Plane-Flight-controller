@@ -28,9 +28,16 @@ module IBUS_Channel_Decoder #(
     parameter int max_out = 2 ** res - 1
     )(
     input [15:0] Data,
-    output [res - 1:0] Out
+    output reg [res - 1:0] Out
     );
-    localparam int step_ratio = ((max_out - min_out) / res) / ((max_in - min_in) / res);
-    
-    assign Out = min_out + (Data - min_in) * step_ratio; 
+    always_comb begin
+        if (Data <= min_in)
+            Out = min_out;
+        else if (Data >= max_in)
+            Out = max_out;
+        else
+            Out = min_out +
+                  ((Data - min_in) * (max_out - min_out))
+                  / (max_in - min_in);
+    end
 endmodule

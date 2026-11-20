@@ -95,7 +95,6 @@ module UART_RX(
                 bauder <= 0;
                 next_state <= 2'b10;
                 cycle <=0;
-                
             end    
         end
     end    
