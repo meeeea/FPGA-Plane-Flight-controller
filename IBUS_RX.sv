@@ -51,7 +51,7 @@ module IBUS_RX #(
     logic [4:0] idx = 0;                // which byte of the frame is next (0-31)
     logic [15:0] sum = 0;               // running sum of bytes 0-29
     logic [7:0] lo = 0;                 // low byte of the channel / checksum being received
-    logic [7: 0]Shadow[11:0];          // channels of the frame being received
+    logic [7:0]Shadow[11:0];          // channels of the frame being received
     logic [$clog2(GAP_CLKS+1)-1:0] gap = 0;
     logic [$clog2(TIMEOUT_CLKS+1)-1:0] silence = TIMEOUT_CLKS;  // clks since last good frame
 
