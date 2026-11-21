@@ -60,14 +60,16 @@ module Master(
     IBUS_RX #(.CLK_HZ(20_000_000)) I1 (clk_20MHz, I_Bus_RX, {Ch_buf[5], Ch_buf[4], 
                 Ch_buf[3], Ch_buf[2], Ch_buf[1], Ch_buf[0]}, FrameValid, Failsafe);
     
-    IBUS_Channel_Decoder #(.res(8), .min_out(0), .max_out(256)) D1 (Channel[throttle_channel], Throttle); //trottle
+    IBUS_Channel_Decoder #(.res(8), .min_out(0), .max_out(255)) D1 (Channel[throttle_channel], Throttle); //trottle
+    
     IBUS_Channel_Decoder #(.res(10), .min_out(380), .max_out(700)) D2 (Channel[roll_channel], Servo_Pos[1]); // right wing pos
-    IBUS_Channel_Decoder #(.res(10), .min_out(360), .max_out(650)) D3 (Channel[roll_channel], Servo_Pos[2]); // left wing pos
+    IBUS_Channel_Decoder #(.res(10), .min_out(360), .max_out(680)) D3 (Channel[roll_channel], Servo_Pos[2]); // left wing pos
+    
     IBUS_Channel_Decoder #(.res(10), .min_out(200), .max_out(700)) D4 (Channel[pitch_channel], Servo_Pos[0]);
     IBUS_Channel_Decoder #(.res(1), .min_out(0), .max_out(1)) D5 (Channel[throttle_enable], throttle_active);
-    //(Failsafe | throttle_active)? 8'h00 : 
-    ESC_Controller O1 (clk_20MHz, (Throttle), ESC_PWM);
-    SCS009_Interpreter O2 (clk_20MHz, Servo_TX, Servo_Pos[0], Servo_Pos[1], Servo_Pos[2], (counter_prev & ~counter[20]), Servo_Ready);
+    
+    ESC_Controller O1 (clk_20MHz, ((Failsafe | throttle_active)? 8'h00 :Throttle), ESC_PWM);
+    SCS009_Interpreter O2 (clk_20MHz, Servo_TX, 10'h3FF - Servo_Pos[0], Servo_Pos[1], Servo_Pos[2], (counter_prev & ~counter[20]), Servo_Ready);
     
     // debug test
     UART_TX T1 (clk_20MHz, DEBUG_TX, Ch_buf[0][7:0], 1);

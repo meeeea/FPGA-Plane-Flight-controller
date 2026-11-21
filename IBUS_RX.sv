@@ -45,7 +45,7 @@ module IBUS_RX #(
     localparam int TIMEOUT_CLKS = CLK_HZ / 1000 * TIMEOUT_MS;
 
     logic [7:0] rData;
-    logic rValid;
+    logic rValid, rValid_d;
     logic rReady;
 
     logic [4:0] idx = 0;                // which byte of the frame is next (0-31)
@@ -61,12 +61,15 @@ module IBUS_RX #(
     begin
         FrameValid <= 0;
         rReady <= 1;
+        rValid_d <= rValid;
+
         if (~Failsafe) silence <= silence + 1;
 
-        if (rValid) begin
+        if (rValid & ~rValid_d) begin
             rReady <= 0;
             gap <= 0;
             idx <= idx + 1;
+            
             if (idx == 0) sum <= rData;
             else if (idx < 30) sum <= sum + rData;
 
@@ -86,7 +89,8 @@ module IBUS_RX #(
                     end
                 end
                 default:
-                    Shadow[idx-2] <= rData;
+                    if (idx >= 2 && idx < 14)
+                        Shadow[idx-2] <= rData;
             endcase
         end
         else if (gap != GAP_CLKS)

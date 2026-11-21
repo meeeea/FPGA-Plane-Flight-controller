@@ -28,7 +28,6 @@ module ESC_Controller #(
     input [Speed_Resolution - 1:0] Speed,
     output ESC_PWM
     );
-    localparam logic Speed_Step = (Max_Speed - Min_Speed) / (2 ** (Speed_Resolution - 1));
     
     logic [18:0] durration;
     
@@ -39,7 +38,7 @@ module ESC_Controller #(
             durration = Max_Speed;
         else
             durration = Min_Speed +
-                  ((Speed - Min_Speed) * (Max_Speed - Min_Speed))
+                  (Speed * (Max_Speed - Min_Speed))
                   / (2 ** Speed_Resolution - 1);
     end
     
